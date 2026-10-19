@@ -1,15 +1,15 @@
 # Índice de Desarrollo Humano e Índice de Densidad del Estado, Perú
 
-Tablero interactivo del IDH (2003-2024) y del IDE (2017-2024) por departamento, provincia y distrito, con mapa coroplético, ranking, lámina comparativa regional, evolución, relación IDH–IDE y tabla de detalle.
+Tablero interactivo del IDH (1993-2024) y del IDE (2017-2024) por departamento, provincia y distrito, con mapa coroplético, ranking, lámina comparativa regional, evolución, relación IDH–IDE y tabla de detalle.
 
 ## Indicadores
 
 | Índice | Unidad | Años | Componentes |
 |---|---|---|---|
-| IDH | Puntaje 0 a 1 | 2003, 2007, 2010-2012, 2015 (serie 1); 2017-2024 (serie 2) | Esperanza de vida, educación, ingreso familiar per cápita |
+| IDH | Puntaje 0 a 1 | 1993, 2000, 2005 (solo departamental); 2003, 2007, 2010-2012, 2015; 2017-2024 | Esperanza de vida, educación, ingreso familiar per cápita |
 | IDE | Puntaje 0 a 1 | 2017-2024 | Agua y saneamiento, electricidad, matrícula secundaria (12-16 años), médicos por 10 mil hab. |
 
-Las series del IDH 2003-2015 y 2017-2024 usan metodologías distintas; el tablero no calcula la variación 2017/2015.
+El IDH tiene tres series con metodologías distintas (1993-2005 departamental, 2003-2015 y 2017-2024); el tablero solo calcula variaciones dentro de cada serie. Para 1993, 2000 y 2005 no hay datos provinciales ni distritales.
 
 ## Mapas
 
