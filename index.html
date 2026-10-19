@@ -259,7 +259,7 @@ body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:var(-
   const $ = (id) => document.getElementById(id);
   const NS = 'http://www.w3.org/2000/svg';
   const loc = d3.formatLocale({ decimal: '.', thousands: ',', grouping: [3], currency: ['S/ ', ''] });
-  const f1 = loc.format(',.1f'), f2 = loc.format('.2f'), f3 = loc.format('.3f'), fint = loc.format(',d'), f0 = loc.format(',.0f');
+  const fax = loc.format('.2~f'), f1 = loc.format(',.1f'), f2 = loc.format('.2f'), f3 = loc.format('.3f'), fint = loc.format(',d'), f0 = loc.format(',.0f');
   const sg = (v, f) => v == null ? '—' : (v > 0 ? '+' : v < 0 ? '−' : '±') + f(Math.abs(v));
 
   // ---------- datos ----------
@@ -701,7 +701,7 @@ body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:var(-
     }
     y.ticks(5).forEach((t) => {
       svgEl('line', { x1: ml, x2: x(ys[ys.length - 1]), y1: y(t), y2: y(t), stroke: 'var(--chart-grid)' }, svg);
-      const tx = svgEl('text', { x: ml - 6, y: y(t) + 4, 'text-anchor': 'end' }, svg); tx.textContent = f1(t);
+      const tx = svgEl('text', { x: ml - 6, y: y(t) + 4, 'text-anchor': 'end' }, svg); tx.textContent = fax(t);
     });
     const short = W < 720, tl = (t) => short ? "'" + String(t).slice(2) : String(t);
     const tw = textW(svg, tl(2024)) + 8;
@@ -740,12 +740,13 @@ body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:var(-
     const on = pts.filter((p) => p.on);
     const r = on.length > 2 ? d3.sum(on, (p) => (p.a - d3.mean(on, (q) => q.a)) * (p.b - d3.mean(on, (q) => q.b))) / Math.sqrt(d3.sum(on, (p) => (p.a - d3.mean(on, (q) => q.a)) ** 2) * d3.sum(on, (p) => (p.b - d3.mean(on, (q) => q.b)) ** 2)) : null;
     $('pm-scat-n').textContent = `Cada punto es un ${NIV[lv][0]}; color según la clase del ${IDX[st.k].short} en el mapa${st.amb !== '00' ? ' (en gris, el resto del país)' : ''}. Correlación entre ambos índices en ${st.amb === '00' ? 'Perú' : depName(st.amb)}: r = ${r == null ? '—' : f2(r)}. La cruz marca el valor nacional.`;
-    const W = box.clientWidth, H = 300, ml = 36, mb = 30;
+    const labelAll = on.length <= 30;
+    const W = box.clientWidth, H = labelAll ? Math.max(340, Math.min(460, W * 0.75)) : 300, ml = 36, mb = 30;
     const svg = svgEl('svg', { width: '100%', viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'IDH frente a IDE' }, box);
     const x = d3.scaleLinear([Math.floor(d3.min(pts, (p) => p.a) * 10) / 10, Math.ceil(d3.max(pts, (p) => p.a) * 10) / 10], [ml, W - 10]);
     const yy = d3.scaleLinear([Math.floor(d3.min(pts, (p) => p.b) * 10) / 10, Math.ceil(d3.max(pts, (p) => p.b) * 10) / 10], [H - mb, 10]);
-    x.ticks(6).forEach((t) => { svgEl('line', { x1: x(t), x2: x(t), y1: 10, y2: H - mb, stroke: 'var(--chart-grid)' }, svg); const tx = svgEl('text', { x: x(t), y: H - mb + 14, 'text-anchor': 'middle' }, svg); tx.textContent = f1(t); });
-    yy.ticks(5).forEach((t) => { svgEl('line', { x1: ml, x2: W - 10, y1: yy(t), y2: yy(t), stroke: 'var(--chart-grid)' }, svg); const tx = svgEl('text', { x: ml - 6, y: yy(t) + 4, 'text-anchor': 'end' }, svg); tx.textContent = f1(t); });
+    x.ticks(6).forEach((t) => { svgEl('line', { x1: x(t), x2: x(t), y1: 10, y2: H - mb, stroke: 'var(--chart-grid)' }, svg); const tx = svgEl('text', { x: x(t), y: H - mb + 14, 'text-anchor': 'middle' }, svg); tx.textContent = fax(t); });
+    yy.ticks(5).forEach((t) => { svgEl('line', { x1: ml, x2: W - 10, y1: yy(t), y2: yy(t), stroke: 'var(--chart-grid)' }, svg); const tx = svgEl('text', { x: ml - 6, y: yy(t) + 4, 'text-anchor': 'end' }, svg); tx.textContent = fax(t); });
     const xl = svgEl('text', { x: W - 10, y: H - 2, 'text-anchor': 'end' }, svg); xl.textContent = 'IDE →';
     const yl = svgEl('text', { x: ml + 4, y: 20 }, svg); yl.textContent = '↑ IDH';
     const rad = lv === 3 ? 2.6 : lv === 2 ? 3.6 : 5;
@@ -761,10 +762,42 @@ body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:var(-
     const na = val('ide', y, 0), nb = val('idh', y, 0);
     const cx = x(na), cy = yy(nb);
     svgEl('path', { d: `M${cx - 6},${cy}H${cx + 6}M${cx},${cy - 6}V${cy + 6}`, stroke: 'var(--color-fg)', 'stroke-width': 2 }, svg);
-    const pt = svgEl('text', { x: cx + 8, y: cy - 6, class: 'pm-strong' }, svg); pt.textContent = 'Perú';
-    if (st.sel != null && val('ide', y, st.sel) != null) { const t = svgEl('text', { x: x(val('ide', y, st.sel)) + 8, y: yy(val('idh', y, st.sel)) + 14, class: 'pm-strong' }, svg); t.textContent = U[st.sel][1]; }
+    // etiquetas sin superposición: se prueban posiciones alrededor de cada punto y, si no hay espacio, más lejos con línea guía
+    const items = [{ px: cx, py: cy, r: 6, t: 'Perú', strong: true }];
+    if (labelAll) on.forEach((p) => items.push({ px: x(p.a), py: yy(p.b), r: st.sel === p.i ? rad + 3 : rad, t: U[p.i][1], strong: st.sel === p.i }));
+    else if (st.sel != null && val('ide', y, st.sel) != null) items.push({ px: x(val('ide', y, st.sel)), py: yy(val('idh', y, st.sel)), r: rad + 3, t: U[st.sel][1], strong: true });
+    const fsz = W < 480 ? 9.5 : 10.5, lh = fsz + 2;
+    const obst = on.map((p) => ({ x0: x(p.a) - rad, x1: x(p.a) + rad, y0: yy(p.b) - rad, y1: yy(p.b) + rad })).concat([{ x0: cx - 6, x1: cx + 6, y0: cy - 6, y1: cy + 6 }]);
+    const placed = [];
+    const hit = (b0) => b0.x0 < ml || b0.x1 > W - 4 || b0.y0 < 4 || b0.y1 > H - mb - 2
+      || placed.some((q) => b0.x0 < q.x1 + 2 && b0.x1 + 2 > q.x0 && b0.y0 < q.y1 + 1 && b0.y1 + 1 > q.y0)
+      || obst.some((q) => b0.x0 < q.x1 && b0.x1 > q.x0 && b0.y0 < q.y1 && b0.y1 > q.y0);
+    const ANG = [0, 180, -30, 30, 150, -150, -60, 60, 120, -120, -90, 90];
+    // primero los puntos más apretados (más vecinos cercanos)
+    items.forEach((it) => { it.w = textW(svg, it.t, 'pm-strong') * fsz / 11; it.nb = items.filter((o) => Math.hypot(o.px - it.px, o.py - it.py) < 40).length; });
+    [...items].sort((a0, b0) => b0.nb - a0.nb).forEach((it) => {
+      let best = null;
+      for (const dd of [3, 9, 16, 26, 38, 52, 70, 90]) {
+        for (const ag of ANG) {
+          const c0 = Math.cos(ag * Math.PI / 180), s0 = Math.sin(ag * Math.PI / 180), d = it.r + dd;
+          const ax = it.px + c0 * d, ay = it.py + s0 * d;
+          const x0 = c0 > 0.35 ? ax : c0 < -0.35 ? ax - it.w : ax - it.w / 2;
+          const y0 = s0 > 0.35 ? ay : s0 < -0.35 ? ay - lh : ay - lh / 2;
+          const b0 = { x0, x1: x0 + it.w, y0, y1: y0 + lh };
+          if (!hit(b0)) { best = { b0, dd, ax, ay }; break; }
+        }
+        if (best) break;
+      }
+      if (!best) return;                                   // sin espacio: queda en el tooltip
+      placed.push(best.b0);
+      if (best.dd > 12) {
+        const tx = Math.max(best.b0.x0, Math.min(best.b0.x1, it.px)), ty = Math.max(best.b0.y0, Math.min(best.b0.y1, it.py));
+        svgEl('line', { x1: it.px, y1: it.py, x2: tx, y2: ty, stroke: 'var(--color-fg-muted)', 'stroke-width': 0.7 }, svg);
+      }
+      const t = svgEl('text', { x: best.b0.x0, y: best.b0.y1 - 3, class: 'pm-lab', style: `font-size:${fsz}px;font-weight:${it.strong ? 700 : 500}` }, svg);
+      t.textContent = it.t;
+    });
   };
-
   // ---------- tabla ----------
   const COLS = [
     { id: 'n', l: 'Nombre', s: true, f: (i) => U[i][1] },
